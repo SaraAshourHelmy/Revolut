@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="rate"
+            type="String" />
+
+        <variable
+            name="currencyName"
+            type="com.ltmtlu.revolut.data.model.Currency" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/currency_padding">
+
+        <ImageView
+            android:id="@+id/currencyImageView"
+            android:layout_width="@dimen/currency_icon_width"
+            android:layout_height="@dimen/currency_icon_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+        <TextView
+            android:id="@+id/currencyNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/currency_padding"
+            android:text="@{currencyName.toString()}"
+            app:layout_constraintBottom_toTopOf="@+id/currencyFullNameTextView"
+            app:layout_constraintStart_toEndOf="@+id/currencyImageView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread_inside"
+            tools:text="USD" />
+
+        <TextView
+            android:id="@+id/currencyFullNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/currency_name"
+            app:layout_constraintBottom_toBottomOf="@+id/currencyImageView"
+            app:layout_constraintStart_toStartOf="@+id/currencyNameTextView"
+            app:layout_constraintTop_toBottomOf="@+id/currencyNameTextView"
+            tools:text="US Dollar" />
+
+        <EditText
+            android:id="@+id/rateEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:text="@{rate}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1.55" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

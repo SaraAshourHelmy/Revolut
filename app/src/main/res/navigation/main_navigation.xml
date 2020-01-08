@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/allRatesFragment">
+
+    <fragment
+        android:id="@+id/allRatesFragment"
+        android:name="com.ltmtlu.revolut.ui.view.AllRatesFragment"
+        android:label="all_rates_fragment"
+        tools:layout="@layout/all_rates_fragment" />
+</navigation>
