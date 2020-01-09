@@ -7,5 +7,5 @@ import kotlinx.android.parcel.Parcelize
 data class RateResponse constructor(
     val base: String,
     val date: String,
-    val rates: Rate
+    val rates: Map<String, Float>
 ) : Parcelable

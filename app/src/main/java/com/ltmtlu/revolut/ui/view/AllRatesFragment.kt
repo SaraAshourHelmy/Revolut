@@ -33,10 +33,18 @@ class AllRatesFragment : Fragment() {
     }
 
     private fun observeData() {
+        var adapter = CurrencyRateAdapter { currency, amount ->
+            viewModel.checkBaseCurrency(currency, amount)
+        }
+        allRatesRecyclerView.adapter = adapter
+
         viewModel.currenciesLiveData.observe(this, Observer { currencies ->
-            allRatesRecyclerView.adapter = CurrencyRateAdapter(currencies){
-                allRatesRecyclerView.scrollToPosition(0)
-            }
+            adapter.updateCurrencyRate(currencies)
+
+        })
+
+        viewModel.amountLiveData.observe(this, Observer {
+            adapter.updateAmount(it)
         })
     }
 

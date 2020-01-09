@@ -1,20 +1,54 @@
 package com.ltmtlu.revolut.ui.item
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ltmtlu.revolut.R
-import com.ltmtlu.revolut.data.model.Currency
 import com.ltmtlu.revolut.databinding.CurrencyItemViewBinding
 import com.ltmtlu.revolut.ui.viewmodel.RateModel
+import com.ltmtlu.revolut.utils.NumberFormatUtil
+import com.ltmtlu.revolut.utils.ResourceUtil
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.set
 
 class CurrencyRateAdapter(
-    val currencies: ArrayList<RateModel>,
-    val changeBase: (Currency) -> Unit
+    val checkBaseCurrency: (String, Float) -> Unit
 ) :
     RecyclerView.Adapter<CurrencyRateAdapter.RateViewHolder>() {
 
+    private val currencyNameList = ArrayList<String>()
+    private val currencyRateMap = HashMap<String, RateModel>()
+    private var amount = 1f
+
+    fun updateCurrencyRate(rates: ArrayList<RateModel>) {
+        if (currencyNameList.isEmpty()) {
+            currencyNameList.addAll(rates.map { it.currency })
+        }
+
+        for (rate in rates) {
+            currencyRateMap[rate.currency] = rate
+        }
+
+        notifyItemRangeChanged(0, currencyNameList.size - 1, amount)
+    }
+
+    private fun rateAtPosition(pos: Int): RateModel {
+        return currencyRateMap[currencyNameList[pos]]!!
+    }
+
+    fun updateAmount(updatedAmount: Float) {
+        amount = updatedAmount
+        notifyItemRangeChanged(0, currencyNameList.size - 1, amount)
+    }
+
+    override fun getItemCount(): Int {
+        return currencyNameList.size
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RateViewHolder {
         val binding = DataBindingUtil.inflate<CurrencyItemViewBinding>(
@@ -26,59 +60,75 @@ class CurrencyRateAdapter(
         return RateViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return currencies.size
-    }
-
     override fun onBindViewHolder(holder: RateViewHolder, position: Int) {
-        holder.bind(currencies[position], position)
+        holder.bind(rateAtPosition(position))
 
-    }
-
-
-    fun moveItemTop(position: Int) {
-        val rate = RateModel(currencies[position].currency, currencies[position].rate)
-        currencies.removeAt(position)
-        currencies.add(0, rate)
-        notifyDataSetChanged()
-        changeBase(currencies[position].currency)
     }
 
     inner class RateViewHolder(val binding: CurrencyItemViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(
-            rateModel: RateModel,
-            position: Int
+            rateModel: RateModel
         ) {
+
             binding.currencyName = rateModel.currency
-            binding.rate = rateModel.rate.toString()
-            binding.root.setOnClickListener {
-                moveItemTop(position)
+            val iconName = String.format("ic_%s", rateModel.currency.toLowerCase())
+            binding.currencyImageView.setImageResource(
+                ResourceUtil.getResourceIcon(
+                    iconName,
+                    binding.root.context
+                )
+            )
+            if (!binding.rateEditText.isFocused)
+                binding.rate = NumberFormatUtil.formatFloatNumber(rateModel.rate * amount)
+
+            binding.rateEditText.onFocusChangeListener = getFocusListener()
+
+            binding.rateEditText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int, before: Int,
+                    count: Int
+                ) {
+                    if (binding.rateEditText.isFocused) {
+                        var newAmount = if (s.isNullOrEmpty()) 0f else s.toString().toFloat()
+                        checkBaseCurrency(rateModel.currency, newAmount)
+                    }
+                }
+            })
+        }
+
+        private fun getFocusListener(): View.OnFocusChangeListener {
+            return View.OnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    return@OnFocusChangeListener
+                }
+                moveToTop()
             }
+        }
 
-//            binding.rateEditText.addTextChangedListener(object : TextWatcher {
-//                override fun afterTextChanged(s: Editable?) {
-//                }
-//
-//                override fun beforeTextChanged(
-//                    s: CharSequence?,
-//                    start: Int,
-//                    count: Int,
-//                    after: Int
-//                ) {
-//
-//                }
-//
-//                override fun onTextChanged(
-//                    s: CharSequence?,
-//                    start: Int, before: Int,
-//                    count: Int
-//                ) {
-//
-//                }
-//            })
-
+        private fun moveToTop() {
+            layoutPosition.takeIf { it > 0 }?.also { currentPosition ->
+                currencyNameList.removeAt(currentPosition).also {
+                    currencyNameList.add(0, it)
+                }
+                notifyItemMoved(currentPosition, 0)
+            }
         }
     }
+
+
 }

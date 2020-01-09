@@ -9,7 +9,7 @@
 
         <variable
             name="currencyName"
-            type="com.ltmtlu.revolut.data.model.Currency" />
+            type="String" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/currency_padding"
-            android:text="@{currencyName.toString()}"
+            android:text="@{currencyName}"
             app:layout_constraintBottom_toTopOf="@+id/currencyFullNameTextView"
             app:layout_constraintStart_toEndOf="@+id/currencyImageView"
             app:layout_constraintTop_toTopOf="parent"

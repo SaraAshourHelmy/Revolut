@@ -6,11 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ltmtlu.revolut.data.backendconfig.RevolutApi
 import com.ltmtlu.revolut.data.model.Currency
-import com.ltmtlu.revolut.data.model.Rate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
 
 class AllRatesViewModel : ViewModel() {
 
@@ -21,65 +22,50 @@ class AllRatesViewModel : ViewModel() {
     private val job = Job()
     private val scope = CoroutineScope(job + Dispatchers.Main)
 
-    private var baseCurrency = Currency.EUR
+    private var baseCurrency = Currency.EUR.name
+
+    private var _amountLiveDate = MutableLiveData<Float>()
+    val amountLiveData: LiveData<Float>
+        get() = _amountLiveDate
+    private val timer = Timer()
 
     init {
-        getAllRates(baseCurrency.name)
+        getCurrencyRate()
     }
 
-    private fun getAllRates(base: String) {
-        scope.launch {
-            val response = RevolutApi.revolutApiService.getRates(base).await()
-            val rate = response.rates
-            Log.e("currencies", rate.toString())
-            convertCurrency(rate)
+    fun checkBaseCurrency(base: String, amount: Float) {
+        if (base.equals(baseCurrency)) {
+            _amountLiveDate.value = amount
+        } else {
+            baseCurrency = base
         }
     }
 
-    private fun convertCurrency(rate: Rate) {
+    private fun convertCurrency(rate: Map<String, Float>) {
         var currencies = ArrayList<RateModel>()
-
-        currencies.add(RateModel(Currency.EUR, rate.eur))
-        currencies.add(RateModel(Currency.AUD, rate.aud))
-        currencies.add(RateModel(Currency.BGN, rate.bgn))
-        currencies.add(RateModel(Currency.BRL, rate.brl))
-        currencies.add(RateModel(Currency.CAD, rate.cad))
-        currencies.add(RateModel(Currency.CHF, rate.chf))
-        currencies.add(RateModel(Currency.CNY, rate.cny))
-        currencies.add(RateModel(Currency.CZK, rate.czk))
-        currencies.add(RateModel(Currency.DKK, rate.dkk))
-        currencies.add(RateModel(Currency.GBP, rate.gbp))
-        currencies.add(RateModel(Currency.HKD, rate.hkd))
-        currencies.add(RateModel(Currency.HRK, rate.hrk))
-        currencies.add(RateModel(Currency.HUF, rate.huf))
-        currencies.add(RateModel(Currency.IDR, rate.idr))
-        currencies.add(RateModel(Currency.ILS, rate.ils))
-        currencies.add(RateModel(Currency.INR, rate.inr))
-        currencies.add(RateModel(Currency.ISK, rate.isk))
-        currencies.add(RateModel(Currency.JPY, rate.jpy))
-        currencies.add(RateModel(Currency.KRW, rate.krw))
-        currencies.add(RateModel(Currency.MXN, rate.mxn))
-        currencies.add(RateModel(Currency.MYR, rate.myr))
-        currencies.add(RateModel(Currency.NOK, rate.nok))
-        currencies.add(RateModel(Currency.NZD, rate.nzd))
-        currencies.add(RateModel(Currency.PHP, rate.php))
-        currencies.add(RateModel(Currency.PLN, rate.pln))
-        currencies.add(RateModel(Currency.RON, rate.ron))
-        currencies.add(RateModel(Currency.RUB, rate.rub))
-        currencies.add(RateModel(Currency.SEK, rate.sek))
-        currencies.add(RateModel(Currency.SGD, rate.sgd))
-        currencies.add(RateModel(Currency.THB, rate.thb))
-        currencies.add(RateModel(Currency.TRY, rate.tryCurrency))
-        currencies.add(RateModel(Currency.USD, rate.usd))
-        currencies.add(RateModel(Currency.ZAR, rate.zar))
-        _currenciesLiveData.value = checkBaseCurrency(currencies)
-
+        currencies.add(RateModel(baseCurrency, 1f))
+        currencies.addAll(rate.map { RateModel(it.key, it.value) })
         _currenciesLiveData.value = currencies
     }
 
-    private fun checkBaseCurrency(currencies: ArrayList<RateModel>): ArrayList<RateModel> {
-        var updateCurrencies = currencies.filter { rateModel -> rateModel.currency == baseCurrency }
-        (updateCurrencies as ArrayList).add(0, RateModel(baseCurrency, 1f))
-        return updateCurrencies
+    private fun getCurrencyRate() {
+        timer.scheduleAtFixedRate(
+            object : TimerTask() {
+                override fun run() {
+                    Log.e("CallAPI", baseCurrency)
+                    scope.launch {
+                        val response = RevolutApi.revolutApiService.getRates(baseCurrency).await()
+                        val rate = response.rates
+                        convertCurrency(rate)
+                    }
+                }
+            },
+            0, 1000
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timer.cancel()
     }
 }
