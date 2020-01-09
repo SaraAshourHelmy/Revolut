@@ -33,21 +33,6 @@ class AllRatesViewModel : ViewModel() {
         getCurrencyRate()
     }
 
-    fun checkBaseCurrency(base: String, amount: Float) {
-        if (base.equals(baseCurrency)) {
-            _amountLiveDate.value = amount
-        } else {
-            baseCurrency = base
-        }
-    }
-
-    private fun convertCurrency(rate: Map<String, Float>) {
-        var currencies = ArrayList<RateModel>()
-        currencies.add(RateModel(baseCurrency, 1f))
-        currencies.addAll(rate.map { RateModel(it.key, it.value) })
-        _currenciesLiveData.value = currencies
-    }
-
     private fun getCurrencyRate() {
         timer.scheduleAtFixedRate(
             object : TimerTask() {
@@ -62,6 +47,21 @@ class AllRatesViewModel : ViewModel() {
             },
             0, 1000
         )
+    }
+
+    private fun convertCurrency(rate: Map<String, Float>) {
+        var currencies = ArrayList<RateModel>()
+        currencies.add(RateModel(baseCurrency, 1f))
+        currencies.addAll(rate.map { RateModel(it.key, it.value) })
+        _currenciesLiveData.value = currencies
+    }
+
+    fun checkBaseCurrency(base: String, amount: Float) {
+        if (base.equals(baseCurrency)) {
+            _amountLiveDate.value = amount
+        } else {
+            baseCurrency = base
+        }
     }
 
     override fun onCleared() {
