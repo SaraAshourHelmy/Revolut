@@ -1,14 +1,12 @@
 package com.ltmtlu.revolut.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ltmtlu.revolut.data.backendconfig.RevolutApi
 import com.ltmtlu.revolut.data.model.Currency
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -18,8 +16,16 @@ class AllRatesViewModel : ViewModel() {
     val currenciesLiveData: LiveData<ArrayList<RateModel>>
         get() = _currenciesLiveData
 
+    private var _hasError = MutableLiveData<Boolean>()
+    val hasError: LiveData<Boolean>
+        get() = _hasError
+
     private val job = Job()
-    private val scope = CoroutineScope(job + Dispatchers.Main)
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        _hasError.value = true
+        _hasProgressVisible.value = false
+    }
+    private val scope = CoroutineScope(job + Dispatchers.Main + coroutineExceptionHandler)
 
     private var baseCurrency = Currency.EUR.name
 
@@ -36,12 +42,14 @@ class AllRatesViewModel : ViewModel() {
     init {
         getCurrencyRate()
         _hasProgressVisible.value = true
+        _hasError.value = false
     }
 
     private fun getCurrencyRate() {
         timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
+                    Log.e("CallAPI", baseCurrency)
                     scope.launch {
                         val response = RevolutApi.revolutApiService.getRates(baseCurrency).await()
                         val rate = response.rates
@@ -67,6 +75,10 @@ class AllRatesViewModel : ViewModel() {
         } else {
             baseCurrency = base
         }
+    }
+
+    fun resetError() {
+        _hasError.value = false
     }
 
     override fun onCleared() {

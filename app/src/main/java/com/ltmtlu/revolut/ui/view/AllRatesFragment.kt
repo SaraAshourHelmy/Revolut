@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
 import com.ltmtlu.revolut.databinding.AllRatesFragmentBinding
 import com.ltmtlu.revolut.ui.item.CurrencyRateAdapter
 import com.ltmtlu.revolut.ui.viewmodel.AllRatesViewModel
@@ -34,7 +35,6 @@ class AllRatesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         observeData()
     }
 
@@ -52,6 +52,14 @@ class AllRatesFragment : Fragment() {
         viewModel.amountLiveData.observe(this, Observer {
             adapter.updateAmount(it)
         })
+
+        viewModel.hasError.observe(this, Observer {
+            if (it) showError()
+        })
     }
 
+    private fun showError() {
+        Snackbar.make(parentLayout, "Error!", Snackbar.LENGTH_SHORT).show()
+        viewModel.resetError()
+    }
 }
