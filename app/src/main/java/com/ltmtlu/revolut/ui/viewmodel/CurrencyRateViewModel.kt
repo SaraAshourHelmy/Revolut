@@ -3,8 +3,8 @@ package com.ltmtlu.revolut.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ltmtlu.revolut.base.BaseViewModel
-import com.ltmtlu.revolut.data.backendconfig.RevolutApi
 import com.ltmtlu.revolut.data.model.Currency
+import com.ltmtlu.revolut.data.repository.CurrencyRateRepository
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -21,7 +21,7 @@ class CurrencyRateViewModel : BaseViewModel() {
         _hasProgressVisible.value = false
     }
     private val scope = CoroutineScope(job + Dispatchers.Main + coroutineExceptionHandler)
-
+    private val currencyRepository = CurrencyRateRepository()
     private var baseCurrency = Currency.EUR.name
 
     private var _amountLiveDate = MutableLiveData<Float>()
@@ -39,8 +39,7 @@ class CurrencyRateViewModel : BaseViewModel() {
             object : TimerTask() {
                 override fun run() {
                     scope.launch {
-                        val response = RevolutApi.revolutApiService.getRates(baseCurrency).await()
-                        val rate = response.rates
+                        val rate = currencyRepository.fetchCurrencyRate(baseCurrency)
                         mapCurrencies(rate)
                         _hasProgressVisible.value = false
                     }
