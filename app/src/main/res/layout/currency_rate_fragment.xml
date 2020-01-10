@@ -5,7 +5,7 @@
 
         <variable
             name="rateViewModel"
-            type="com.ltmtlu.revolut.ui.viewmodel.AllRatesViewModel" />
+            type="com.ltmtlu.revolut.ui.viewmodel.CurrencyRateViewModel" />
     </data>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".ui.view.AllRatesFragment">
+        tools:context=".ui.view.CurrencyRateFragment">
 
         <TextView
             android:id="@+id/headerTextView"

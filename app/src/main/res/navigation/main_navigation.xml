@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/allRatesFragment"
-        android:name="com.ltmtlu.revolut.ui.view.AllRatesFragment"
+        android:name="com.ltmtlu.revolut.ui.view.CurrencyRateFragment"
         android:label="all_rates_fragment"
-        tools:layout="@layout/all_rates_fragment" />
+        tools:layout="@layout/currency_rate_fragment" />
 </navigation>

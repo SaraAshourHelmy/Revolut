@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ltmtlu.revolut.R
-import com.ltmtlu.revolut.databinding.CurrencyItemViewBinding
+import com.ltmtlu.revolut.databinding.CurrencyRateItemBinding
 import com.ltmtlu.revolut.ui.viewmodel.RateModel
 import com.ltmtlu.revolut.utils.NumberFormatUtil
 import com.ltmtlu.revolut.utils.ResourceUtil
@@ -17,7 +17,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.set
 
 class CurrencyRateAdapter(
-    val checkBaseCurrency: (String, Float) -> Unit
+    val checkBaseCurrency: (String, Float, Boolean) -> Unit
 ) :
     RecyclerView.Adapter<CurrencyRateAdapter.RateViewHolder>() {
 
@@ -51,9 +51,9 @@ class CurrencyRateAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RateViewHolder {
-        val binding = DataBindingUtil.inflate<CurrencyItemViewBinding>(
+        val binding = DataBindingUtil.inflate<CurrencyRateItemBinding>(
             LayoutInflater.from(parent.context),
-            R.layout.currency_item_view,
+            R.layout.currency_rate_item,
             parent, false
         )
 
@@ -65,7 +65,7 @@ class CurrencyRateAdapter(
 
     }
 
-    inner class RateViewHolder(val binding: CurrencyItemViewBinding) :
+    inner class RateViewHolder(val binding: CurrencyRateItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(
@@ -84,6 +84,10 @@ class CurrencyRateAdapter(
                 binding.rate = NumberFormatUtil.formatFloatNumber(rateModel.rate * amount)
 
             binding.rateEditText.onFocusChangeListener = getFocusListener()
+            binding.root.setOnClickListener {
+                moveToTop()
+                checkBaseCurrency("", 1f, true)
+            }
 
             binding.rateEditText.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
@@ -105,7 +109,7 @@ class CurrencyRateAdapter(
                 ) {
                     if (binding.rateEditText.isFocused) {
                         var newAmount = if (s.isNullOrEmpty()) 0f else s.toString().toFloat()
-                        checkBaseCurrency(rateModel.currency, newAmount)
+                        checkBaseCurrency(rateModel.currency, newAmount, false)
                     }
                 }
             })

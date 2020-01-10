@@ -1,24 +1,19 @@
 package com.ltmtlu.revolut.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.ltmtlu.revolut.base.BaseViewModel
 import com.ltmtlu.revolut.data.backendconfig.RevolutApi
 import com.ltmtlu.revolut.data.model.Currency
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class AllRatesViewModel : ViewModel() {
+class CurrencyRateViewModel : BaseViewModel() {
 
     private var _currenciesLiveData = MutableLiveData<ArrayList<RateModel>>()
     val currenciesLiveData: LiveData<ArrayList<RateModel>>
         get() = _currenciesLiveData
-
-    private var _hasError = MutableLiveData<Boolean>()
-    val hasError: LiveData<Boolean>
-        get() = _hasError
 
     private val job = Job()
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -33,27 +28,20 @@ class AllRatesViewModel : ViewModel() {
     val amountLiveData: LiveData<Float>
         get() = _amountLiveDate
 
-    private var _hasProgressVisible = MutableLiveData<Boolean>()
-    val hasProgressVisible: LiveData<Boolean>
-        get() = _hasProgressVisible
-
     private val timer = Timer()
 
     init {
         getCurrencyRate()
-        _hasProgressVisible.value = true
-        _hasError.value = false
     }
 
     private fun getCurrencyRate() {
         timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
-                    Log.e("CallAPI", baseCurrency)
                     scope.launch {
                         val response = RevolutApi.revolutApiService.getRates(baseCurrency).await()
                         val rate = response.rates
-                        convertCurrency(rate)
+                        mapCurrencies(rate)
                         _hasProgressVisible.value = false
                     }
                 }
@@ -62,7 +50,7 @@ class AllRatesViewModel : ViewModel() {
         )
     }
 
-    private fun convertCurrency(rate: Map<String, Float>) {
+    private fun mapCurrencies(rate: Map<String, Float>) {
         var currencies = ArrayList<RateModel>()
         currencies.add(RateModel(baseCurrency, 1f))
         currencies.addAll(rate.map { RateModel(it.key, it.value) })
@@ -75,10 +63,6 @@ class AllRatesViewModel : ViewModel() {
         } else {
             baseCurrency = base
         }
-    }
-
-    fun resetError() {
-        _hasError.value = false
     }
 
     override fun onCleared() {
