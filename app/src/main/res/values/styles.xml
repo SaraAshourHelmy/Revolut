@@ -30,5 +30,9 @@
         <item name="android:textSize">@dimen/full_name_size</item>
     </style>
 
+    <!-- Circle progress -->
+    <style name="CircularProgress" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
 </resources>

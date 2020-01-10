@@ -1,6 +1,5 @@
 package com.ltmtlu.revolut.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,21 +26,27 @@ class AllRatesViewModel : ViewModel() {
     private var _amountLiveDate = MutableLiveData<Float>()
     val amountLiveData: LiveData<Float>
         get() = _amountLiveDate
+
+    private var _hasProgressVisible = MutableLiveData<Boolean>()
+    val hasProgressVisible: LiveData<Boolean>
+        get() = _hasProgressVisible
+
     private val timer = Timer()
 
     init {
         getCurrencyRate()
+        _hasProgressVisible.value = true
     }
 
     private fun getCurrencyRate() {
         timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
-                    Log.e("CallAPI", baseCurrency)
                     scope.launch {
                         val response = RevolutApi.revolutApiService.getRates(baseCurrency).await()
                         val rate = response.rates
                         convertCurrency(rate)
+                        _hasProgressVisible.value = false
                     }
                 }
             },
