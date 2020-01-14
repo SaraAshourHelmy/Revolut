@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class RateResponse constructor(
+data class CurrencyRateModel constructor(
     val base: String,
     val date: String,
     val rates: Map<String, Float>

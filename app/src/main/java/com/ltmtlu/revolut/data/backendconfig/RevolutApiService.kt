@@ -1,7 +1,7 @@
 package com.ltmtlu.revolut.data.backendconfig
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.ltmtlu.revolut.data.model.RateResponse
+import com.ltmtlu.revolut.data.model.CurrencyRateModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Deferred
@@ -27,7 +27,7 @@ val retrofit = Retrofit.Builder()
 interface RevolutApiService {
 
     @GET("latest")
-    fun getRates(@Query("base") base: String): Deferred<RateResponse>
+    fun getRates(@Query("base") base: String): Deferred<CurrencyRateModel>
 }
 
 object RevolutApi {

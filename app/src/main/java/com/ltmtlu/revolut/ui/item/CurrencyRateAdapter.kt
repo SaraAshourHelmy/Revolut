@@ -81,7 +81,7 @@ class CurrencyRateAdapter(
                 )
             )
             if (!binding.rateEditText.isFocused)
-                binding.rate = NumberFormatUtil.formatFloatNumber(rateModel.rate * amount)
+                binding.rate = NumberFormatUtil.formatFloatNumber(rateModel.getAmountRate(amount))
 
             binding.rateEditText.onFocusChangeListener = getFocusListener()
             binding.root.setOnClickListener {
@@ -108,7 +108,12 @@ class CurrencyRateAdapter(
                     count: Int
                 ) {
                     if (binding.rateEditText.isFocused) {
-                        var newAmount = if (s.isNullOrEmpty()) 0f else s.toString().toFloat()
+                        var newAmount: Float
+                        try {
+                            newAmount = if (s.isNullOrEmpty()) 0f else s.toString().toFloat()
+                        } catch (ex: NumberFormatException) {
+                            newAmount = 0f
+                        }
                         checkBaseCurrency(rateModel.currency, newAmount, false)
                     }
                 }

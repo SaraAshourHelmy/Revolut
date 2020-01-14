@@ -3,13 +3,13 @@ package com.ltmtlu.revolut.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ltmtlu.revolut.base.BaseViewModel
-import com.ltmtlu.revolut.data.model.Currency
 import com.ltmtlu.revolut.data.repository.CurrencyRateRepository
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class CurrencyRateViewModel : BaseViewModel() {
+class CurrencyRateViewModel(private val currencyRepository: CurrencyRateRepository) :
+    BaseViewModel() {
 
     private var _currenciesLiveData = MutableLiveData<ArrayList<RateModel>>()
     val currenciesLiveData: LiveData<ArrayList<RateModel>>
@@ -21,8 +21,7 @@ class CurrencyRateViewModel : BaseViewModel() {
         _hasProgressVisible.value = false
     }
     private val scope = CoroutineScope(job + Dispatchers.Main + coroutineExceptionHandler)
-    private val currencyRepository = CurrencyRateRepository()
-    private var baseCurrency = Currency.EUR.name
+    private var baseCurrency = "EUR"
 
     private var _amountLiveDate = MutableLiveData<Float>()
     val amountLiveData: LiveData<Float>
@@ -34,13 +33,13 @@ class CurrencyRateViewModel : BaseViewModel() {
         getCurrencyRate()
     }
 
-    private fun getCurrencyRate() {
+    fun getCurrencyRate() {
         timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
                     scope.launch {
                         val rate = currencyRepository.fetchCurrencyRate(baseCurrency)
-                        mapCurrencies(rate)
+                        _currenciesLiveData.value = mapCurrencies(rate)
                         _hasProgressVisible.value = false
                     }
                 }
@@ -49,11 +48,11 @@ class CurrencyRateViewModel : BaseViewModel() {
         )
     }
 
-    private fun mapCurrencies(rate: Map<String, Float>) {
+    fun mapCurrencies(rate: Map<String, Float>): ArrayList<RateModel> {
         var currencies = ArrayList<RateModel>()
         currencies.add(RateModel(baseCurrency, 1f))
         currencies.addAll(rate.map { RateModel(it.key, it.value) })
-        _currenciesLiveData.value = currencies
+        return currencies
     }
 
     fun checkBaseCurrency(base: String, amount: Float) {

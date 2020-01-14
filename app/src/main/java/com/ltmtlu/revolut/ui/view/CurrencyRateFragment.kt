@@ -9,17 +9,22 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ltmtlu.revolut.base.BaseFragment
+import com.ltmtlu.revolut.data.repository.CurrencyRateRepository
 import com.ltmtlu.revolut.databinding.CurrencyRateFragmentBinding
 import com.ltmtlu.revolut.ui.item.CurrencyRateAdapter
 import com.ltmtlu.revolut.ui.viewmodel.CurrencyRateViewModel
+import com.ltmtlu.revolut.ui.viewmodel.CurrencyRateViewModelFactory
 import kotlinx.android.synthetic.main.currency_rate_fragment.*
 
 
 class CurrencyRateFragment : BaseFragment() {
 
 
+    private val viewModelFactory: CurrencyRateViewModelFactory by lazy {
+        CurrencyRateViewModelFactory(CurrencyRateRepository())
+    }
     private val viewModel: CurrencyRateViewModel by lazy {
-        ViewModelProviders.of(this).get(CurrencyRateViewModel::class.java)
+        ViewModelProviders.of(this, viewModelFactory).get(CurrencyRateViewModel::class.java)
     }
     private lateinit var binding: CurrencyRateFragmentBinding
     private lateinit var adapter: CurrencyRateAdapter
